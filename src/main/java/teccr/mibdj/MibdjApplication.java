@@ -1,4 +1,4 @@
-package teccr.justdoitcloud;
+package teccr.mibdj;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -6,10 +6,10 @@ import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 @SpringBootApplication
-public class JustDoItCloudApplication implements WebMvcConfigurer {
+public class MibdjApplication implements WebMvcConfigurer {
 
     public static void main(String[] args) {
-        SpringApplication.run(JustDoItCloudApplication.class, args);
+        SpringApplication.run(MibdjApplication.class, args);
     }
 
     @Override

@@ -1,11 +1,11 @@
-package teccr.justdoitcloud.repository;
+package teccr.mibdj.repository;
 
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
-import teccr.justdoitcloud.data.Task;
+import teccr.mibdj.data.Task;
 
 import java.sql.Date;
 import java.sql.PreparedStatement;

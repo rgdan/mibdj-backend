@@ -9,10 +9,10 @@
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
     <groupId>teccr</groupId>
-    <artifactId>JustDoItCloud</artifactId>
+    <artifactId>mibdj</artifactId>
     <version>0.0.1-SNAPSHOT</version>
-    <name>JustDoItCloudPresentacion</name>
-    <description>JustDoItCloudPresentacion</description>
+    <name>mibdj</name>
+    <description>mibdj</description>
     <url/>
     <licenses>
         <license/>

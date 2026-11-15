@@ -1,4 +1,4 @@
-package teccr.justdoitcloud.config;
+package teccr.mibdj.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

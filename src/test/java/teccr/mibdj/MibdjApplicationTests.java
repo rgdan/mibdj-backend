@@ -1,10 +1,10 @@
-package teccr.justdoitcloud;
+package teccr.mibdj;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
 @SpringBootTest
-class JustDoItCloudApplicationTests {
+class MibdjApplicationTests {
 
     @Test
     void contextLoads() {

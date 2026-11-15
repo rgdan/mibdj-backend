@@ -1,6 +1,6 @@
-package teccr.justdoitcloud.service.external.taskgenerator;
+package teccr.mibdj.service.external.taskgenerator;
 
-import teccr.justdoitcloud.data.Task;
+import teccr.mibdj.data.Task;
 
 /**
  * Interfaz para generar tareas

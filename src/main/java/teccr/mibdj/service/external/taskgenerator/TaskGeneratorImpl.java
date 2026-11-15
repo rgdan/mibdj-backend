@@ -1,12 +1,12 @@
-package teccr.justdoitcloud.service.external.taskgenerator;
+package teccr.mibdj.service.external.taskgenerator;
 
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
-import teccr.justdoitcloud.data.Task;
-import teccr.justdoitcloud.service.external.dto.DummyJsonTODODto;
+import teccr.mibdj.data.Task;
+import teccr.mibdj.service.external.dto.DummyJsonTODODto;
 
 @Slf4j
 @Service

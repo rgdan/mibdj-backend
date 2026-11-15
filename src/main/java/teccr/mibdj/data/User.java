@@ -1,4 +1,4 @@
-package teccr.justdoitcloud.data;
+package teccr.mibdj.data;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
