@@ -1,4 +1,4 @@
-package teccr.justdoitcloud.service.external.dto;
+package teccr.mibdj.service.external.dto;
 
 import lombok.Data;
 

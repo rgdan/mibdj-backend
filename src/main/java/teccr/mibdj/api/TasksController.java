@@ -1,11 +1,11 @@
-package teccr.justdoitcloud.api;
+package teccr.mibdj.api;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import teccr.justdoitcloud.data.Task;
-import teccr.justdoitcloud.data.User;
-import teccr.justdoitcloud.service.TaskService;
+import teccr.mibdj.data.Task;
+import teccr.mibdj.data.User;
+import teccr.mibdj.service.TaskService;
 
 import java.util.Optional;
 

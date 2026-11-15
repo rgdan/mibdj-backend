@@ -1,10 +1,10 @@
-package teccr.justdoitcloud.service;
+package teccr.mibdj.service;
 
 import org.springframework.stereotype.Service;
-import teccr.justdoitcloud.data.Task;
-import teccr.justdoitcloud.data.User;
-import teccr.justdoitcloud.repository.TaskRepository;
-import teccr.justdoitcloud.service.external.taskgenerator.TaskGenerator;
+import teccr.mibdj.data.Task;
+import teccr.mibdj.data.User;
+import teccr.mibdj.repository.TaskRepository;
+import teccr.mibdj.service.external.taskgenerator.TaskGenerator;
 
 import java.time.LocalDateTime;
 import java.util.List;

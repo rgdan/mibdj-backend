@@ -1,8 +1,8 @@
-package teccr.justdoitcloud.service;
+package teccr.mibdj.service;
 
 import org.springframework.stereotype.Service;
-import teccr.justdoitcloud.data.User;
-import teccr.justdoitcloud.repository.UserRepository;
+import teccr.mibdj.data.User;
+import teccr.mibdj.repository.UserRepository;
 
 import java.time.LocalDateTime;
 import java.util.Optional;

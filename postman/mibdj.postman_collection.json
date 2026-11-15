@@ -1,7 +1,7 @@
 {
   "info": {
     "_postman_id": "7c73c23b-ac63-45eb-860c-5aaa6d041279",
-    "name": "JustDoItCloud API Collection",
+    "name": "mibdj API Collection",
     "description": "Colección para probar los endpoints expuestos en el paquete api (UsersController, TasksController). Configure {{baseUrl}} antes de ejecutar.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
     "_exporter_id": "52919091",

@@ -1,6 +1,6 @@
-package teccr.justdoitcloud.repository;
+package teccr.mibdj.repository;
 
-import teccr.justdoitcloud.data.Task;
+import teccr.mibdj.data.Task;
 
 import java.util.List;
 import java.util.Optional;
