@@ -2,6 +2,33 @@
 
 Este documento describe la API REST JSON disponible en el proyecto. Los endpoints usan el prefijo `/api/v1` y no requieren una sesion iniciada.
 
+## Configuracion local de MySQL
+
+1. Inicie MySQL y cree la base de datos que usara en `DB_URL` (`justdoitdb` en el ejemplo) si todavia no existe.
+2. Desde la raiz del proyecto, copie el archivo de ejemplo:
+
+   ```sh
+   cp .env.example .env
+   ```
+
+3. Edite `.env` con la URL, el usuario y la contrasena de MySQL. La URL incluye el servidor, el puerto, el nombre de la base de datos y los parametros de conexion:
+
+   ```properties
+   DB_URL=jdbc:mysql://localhost:3306/justdoitdb?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+   DB_USR_NAME=your_mysql_username
+   DB_PWD=your_mysql_password
+   ```
+
+4. Ejecute la aplicacion desde la raiz del proyecto con Java 21 o posterior:
+
+   ```sh
+   sh ./mvnw spring-boot:run
+   ```
+
+Spring Boot carga `.env` automaticamente desde el directorio de trabajo. El archivo usa formato Java properties: escriba los valores sin comillas ni `export`; para incluir una barra invertida literal, escriba `\\`. `.env` esta excluido de Git; comparta solamente `.env.example`, sin credenciales reales.
+
+Las variables de entorno `DB_URL`, `DB_USR_NAME` y `DB_PWD` tienen prioridad sobre los valores correspondientes de `.env`. El archivo es opcional si ya configura esas variables. Si no define `DB_URL`, se usa la conexion local del ejemplo. Reinicie la aplicacion despues de cambiar `.env`. Este archivo configura la conexion; MySQL debe estar ejecutandose por separado.
+
 ## URL base
 
 Al ejecutar la aplicacion localmente, use:
