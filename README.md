@@ -27,7 +27,7 @@ Este documento describe la API REST JSON disponible en el proyecto. Los endpoint
 
 Spring Boot carga `.env` automaticamente desde el directorio de trabajo. El archivo usa formato Java properties: escriba los valores sin comillas ni `export`; para incluir una barra invertida literal, escriba `\\`. `.env` esta excluido de Git; comparta solamente `.env.example`, sin credenciales reales.
 
-Las variables de entorno `DB_URL`, `DB_USR_NAME` y `DB_PWD` tienen prioridad sobre los valores correspondientes de `.env`. El archivo es opcional si ya configura esas variables. Si no define `DB_URL`, se usa la conexion local del ejemplo. Reinicie la aplicacion despues de cambiar `.env`. Este archivo configura la conexion; MySQL debe estar ejecutandose por separado.
+Las variables de entorno `DB_URL`, `DB_USR_NAME` y `DB_PWD` tienen prioridad sobre los valores correspondientes de `.env`. Debe configurar los tres valores; no hay una URL de conexion predeterminada. El archivo es opcional si ya configura esas variables. Reinicie la aplicacion despues de cambiar `.env`. Este archivo configura la conexion; MySQL debe estar ejecutandose por separado.
 
 ## URL base
 
