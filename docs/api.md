@@ -2,25 +2,65 @@
 
 [Volver al README](../README.md)
 
-Las rutas usan el prefijo `/api/v1` y no requieren una sesión iniciada.
+## API actual
 
-## Estado actual
-
-El controlador de usuarios todavía pertenece al ejemplo anterior y consulta `users`. Los scripts de MiBDJ crean `Usuario` y las tablas de juegos de mesa. Estas rutas están pendientes de adaptar y no funcionan con el esquema actual; se conservan aquí como referencia del código existente.
-
-Para comprobar el arranque y la conexión a MySQL, usar `GET /actuator/health`. Con ambos disponibles responde HTTP 200 y `status: "UP"`.
-
-## URL base
-
-Al ejecutar la aplicacion localmente, use:
+### URL base
 
 ```text
 http://localhost:8080
 ```
 
-Los cuerpos de las solicitudes y respuestas usan JSON. Al enviar un cuerpo JSON, incluya el encabezado `Content-Type: application/json`.
+Las respuestas usan JSON. Las rutas de usuarios consultan la tabla `Usuario` con `JdbcTemplate` y no requieren una sesión iniciada.
 
-## Usuarios
+### Usuarios
+
+| Método | Ruta | Respuesta |
+|---|---|---|
+| `GET` | `/api/v1/users` | `200 OK` con un arreglo de usuarios. Si no hay usuarios, devuelve `[]`. |
+| `GET` | `/api/v1/users/{id}` | `200 OK` con el usuario; `404 Not Found` si el ID no existe. |
+
+Campos de la respuesta:
+
+| Campo JSON | Tipo | Columna en MySQL |
+|---|---|---|
+| `id` | integer | `id_usuario` |
+| `name` | string | `nombre` |
+| `email` | string | `email` |
+| `country` | string | `pais` |
+| `date` | string, `YYYY-MM-DD` | `fecha` |
+
+Se utilizan los usuarios precargados. Estas rutas no crean, editan ni eliminan usuarios.
+
+```sh
+curl -i http://localhost:8080/api/v1/users
+curl -i http://localhost:8080/api/v1/users/1
+curl -i http://localhost:8080/api/v1/users/999999
+```
+
+Respuesta del detalle del usuario `1` del seed:
+
+```json
+{
+  "id": 1,
+  "name": "Ana Mora",
+  "email": "ana.mora@gmail.com",
+  "country": "Costa Rica",
+  "date": "2025-11-03"
+}
+```
+
+### Estado del servicio
+
+`GET /actuator/health` comprueba el estado del backend, incluida la conexión a MySQL. Si está disponible, devuelve HTTP 200 y `"status":"UP"`.
+
+El pseudologin por email todavía está pendiente en la [issue #25](https://github.com/rgdan/mibdj-backend/issues/25).
+
+## API anterior
+
+Referencia histórica del ejemplo de usuarios. Consultaba la tabla `users`; este contrato no corresponde al esquema actual de MiBDJ. Las rutas `POST`, `PATCH` y `DELETE` de esta sección fueron eliminadas, al igual que los campos `userName`, `type` y `createdAt`. Las dos rutas GET conservan su URL, pero ahora devuelven los campos de la API actual.
+
+### Usuarios
+
 
 | Metodo | Endpoint | Descripcion | Respuesta exitosa |
 |---|---|---|---|
@@ -67,14 +107,3 @@ Content-Type: application/json
   "email": "ana.new@example.com"
 }
 ```
-
-## Ejemplo con curl
-
-```sh
-curl http://localhost:8080/api/v1/users
-```
-
-## Notas
-
-- Reemplace los IDs de las rutas por los valores numericos que devuelve la API.
-- La aplicacion utiliza MySQL. Configure la conexion a la base de datos para su entorno antes de iniciar el servicio.
