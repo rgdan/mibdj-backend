@@ -7,14 +7,13 @@ import teccr.mibdj.data.User;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Timestamp;
 import java.util.List;
 import java.util.Optional;
 
 @Repository
 public class JdbcUserRepository implements UserRepository {
 
-    private static final String SELECT_COLUMNS = "id, user_name, name, email, type, created_at";
+    private static final String SELECT_COLUMNS = "id_usuario, nombre, email, pais, fecha";
     private static final RowMapper<User> USER_ROW_MAPPER = JdbcUserRepository::mapUser;
 
     private final JdbcTemplate jdbcTemplate;
@@ -25,12 +24,12 @@ public class JdbcUserRepository implements UserRepository {
 
     @Override
     public List<User> findAll() {
-        return jdbcTemplate.query("SELECT " + SELECT_COLUMNS + " FROM users", USER_ROW_MAPPER);
+        return jdbcTemplate.query("SELECT " + SELECT_COLUMNS + " FROM Usuario", USER_ROW_MAPPER);
     }
 
     @Override
     public Optional<User> findById(Long id) {
-        return jdbcTemplate.query("SELECT " + SELECT_COLUMNS + " FROM users WHERE id = ?",
+        return jdbcTemplate.query("SELECT " + SELECT_COLUMNS + " FROM Usuario WHERE id_usuario = ?",
                         USER_ROW_MAPPER, id)
                 .stream()
                 .findFirst();
@@ -38,14 +37,11 @@ public class JdbcUserRepository implements UserRepository {
 
     private static User mapUser(ResultSet resultSet, int rowNumber) throws SQLException {
         User user = new User();
-        user.setId(resultSet.getLong("id"));
-        user.setUserName(resultSet.getString("user_name"));
-        user.setName(resultSet.getString("name"));
+        user.setId(resultSet.getLong("id_usuario"));
+        user.setName(resultSet.getString("nombre"));
         user.setEmail(resultSet.getString("email"));
-        String type = resultSet.getString("type");
-        user.setType(type == null ? null : User.Type.valueOf(type));
-        Timestamp createdAt = resultSet.getTimestamp("created_at");
-        user.setCreatedAt(createdAt == null ? null : createdAt.toLocalDateTime());
+        user.setCountry(resultSet.getString("pais"));
+        user.setDate(resultSet.getDate("fecha").toLocalDate());
         return user;
     }
 }
