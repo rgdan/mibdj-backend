@@ -4,4 +4,7 @@ API REST de Mi base de datos de juegos de mesa, hecha con Java 21, Spring Boot y
 
 - [Instalación, configuración y ejecución](docs/setup.md)
 - [Rutas de la API](docs/api.md)
-- [Frontend](https://github.com/rgdan/mibdj-frontend)
+
+## Frontend
+
+[rgdan/mibdj-frontend](https://github.com/rgdan/mibdj-frontend)
