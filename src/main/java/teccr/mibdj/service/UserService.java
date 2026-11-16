@@ -23,6 +23,10 @@ public class UserService {
         return userRepository.findAll();
     }
 
+    public Optional<User> getUserByEmail(String email) {
+        return userRepository.findByEmail(email);
+    }
+
     public Optional<User> getUserById(Long id) {
         if (id == null || id < 0) {
             return Optional.empty();
