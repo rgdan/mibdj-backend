@@ -18,7 +18,7 @@ Al ejecutar la aplicacion localmente, use:
 http://localhost:8080
 ```
 
-Los cuerpos de las solicitudes y respuestas usan JSON. Al enviar un cuerpo JSON, incluya el encabezado `Content-Type: application/json`. La [colección de Postman](../postman/mibdj.postman_collection.json) contiene las peticiones del ejemplo anterior.
+Los cuerpos de las solicitudes y respuestas usan JSON. Al enviar un cuerpo JSON, incluya el encabezado `Content-Type: application/json`.
 
 ## Usuarios
 
