@@ -4,7 +4,6 @@ import org.springframework.stereotype.Service;
 import teccr.mibdj.data.User;
 import teccr.mibdj.repository.UserRepository;
 
-import java.time.LocalDateTime;
 import java.util.Optional;
 
 /**
@@ -20,20 +19,6 @@ public class UserService {
         this.userRepository = userRepository;
     }
 
-    /**
-     * Authenticate a user by username. For initial purposes this only looks
-     * up the user by username and returns it if present.
-     *
-     * @param username the username to authenticate
-     * @return Optional containing the User if found
-     */
-    public Optional<User> authenticate(String username) {
-        if (username == null || username.trim().isEmpty()) {
-            return Optional.empty();
-        }
-        return userRepository.findByUserName(username.trim());
-    }
-
     public Iterable<User> getAllUsers() {
         return userRepository.findAll();
     }
@@ -44,31 +29,4 @@ public class UserService {
         }
         return userRepository.findById(id);
     }
-
-    public User createUser(User user) {
-        user.setCreatedAt(LocalDateTime.now());
-        return userRepository.save(user);
-    }
-
-    public User updateUserFields(Long id, User updatedUser) {
-        return userRepository.findById(id)
-                .map(existingUser -> {
-                    if (updatedUser.getName() != null && !updatedUser.getName().trim().isEmpty()) {
-                        existingUser.setName(updatedUser.getName().trim());
-                    }
-                    if (updatedUser.getEmail() != null && !updatedUser.getEmail().trim().isEmpty()) {
-                        existingUser.setEmail(updatedUser.getEmail().trim());
-                    }
-                    if (updatedUser.getType() != null) {
-                        existingUser.setType(updatedUser.getType());
-                    }
-                    return userRepository.save(existingUser);
-                })
-                .orElseThrow(() -> new RuntimeException("User not found with id: " + id));
-    }
-
-    public void deleteUser(Long id) {
-        userRepository.deleteById(id);
-    }
-
 }
