@@ -35,6 +35,13 @@ public class JdbcUserRepository implements UserRepository {
                 .findFirst();
     }
 
+    public Optional<User> findByEmail(String email) {
+        return jdbcTemplate.query("SELECT " + SELECT_COLUMNS + " FROM Usuario WHERE email = ?",
+                        USER_ROW_MAPPER, email)
+                .stream()
+                .findFirst();
+    }
+
     private static User mapUser(ResultSet resultSet, int rowNumber) throws SQLException {
         User user = new User();
         user.setId(resultSet.getLong("id_usuario"));

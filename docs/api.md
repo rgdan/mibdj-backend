@@ -49,6 +49,28 @@ Respuesta del detalle del usuario `1` del seed:
 }
 ```
 
+### Acceso por email
+
+`POST /api/v1/session` busca un usuario precargado por su email y devuelve
+los mismos campos que el detalle de usuario.
+
+```sh
+curl -i http://localhost:8080/api/v1/session \
+  -H 'Content-Type: application/json' \
+  -d '{"email":"ana.mora@gmail.com"}'
+```
+
+Se quitan los espacios al principio y al final del email antes de validarlo.
+
+| Respuesta | Cuándo |
+|---|---|
+| `200 OK` | El usuario existe; devuelve su información. |
+| `400 Bad Request` | Falta el email, está vacío o su formato es inválido. |
+| `404 Not Found` | No existe un usuario con ese email. |
+
+Es un pseudologin: no pide contraseña, no genera tokens ni cookies de sesión
+y no crea usuarios.
+
 ### Juegos
 
 | Método | Ruta | Respuesta |
@@ -98,8 +120,6 @@ curl -i http://localhost:8080/api/v1/categories
 ### Estado del servicio
 
 `GET /actuator/health` comprueba el estado del backend, incluida la conexión a MySQL. Si está disponible, devuelve HTTP 200 y `"status":"UP"`.
-
-El pseudologin por email todavía está pendiente en la [issue #25](https://github.com/rgdan/mibdj-backend/issues/25).
 
 ## API anterior
 
