@@ -105,4 +105,4 @@ curl http://localhost:8080/actuator/health
 
 Debe responder HTTP 200 y mostrar `"status":"UP"`. `Ctrl+C` detiene el backend.
 
-Las rutas de usuarios y tareas todavía necesitan adaptarse al esquema de MiBDJ; el estado y los contratos actuales están en [la documentación de la API](api.md).
+Las rutas de usuarios todavía necesitan adaptarse al esquema de MiBDJ; el estado y los contratos actuales están en [la documentación de la API](api.md).
