@@ -49,6 +49,52 @@ Respuesta del detalle del usuario `1` del seed:
 }
 ```
 
+### Juegos
+
+| Método | Ruta | Respuesta |
+|---|---|---|
+| `GET` | `/api/v1/games` | `200 OK` con un arreglo de juegos. |
+| `GET` | `/api/v1/games/{id}` | `200 OK` con el juego; `404 Not Found` si no existe. |
+
+El listado acepta estos filtros opcionales, que pueden combinarse:
+
+| Parámetro | Uso |
+|---|---|
+| `title` | Coincidencia parcial del título. Se quitan espacios externos; vacío significa sin filtro. |
+| `categoryId` | ID de categoría. Si no existe, devuelve `[]`. Un valor no numérico devuelve 400. |
+
+Cada juego aparece una sola vez e incluye todas sus categorías,
+incluso cuando se filtra por una de ellas.
+Una búsqueda sin coincidencias devuelve `[]`.
+
+| Campo JSON | Tipo | Columna en MySQL |
+|---|---|---|
+| `id` | integer | `id_juego` |
+| `title` | string | `titulo` |
+| `publisher` | string | `editorial` |
+| `publicationYear` | integer | `anio_publicacion` |
+| `minPlayers` | integer | `min_jugadores` |
+| `maxPlayers` | integer | `max_jugadores` |
+| `durationMin` | integer, minutos | `duracion_min` |
+| `categories` | arreglo de objetos con `id` y `name` | `Juego_categoria` y `Categoria` |
+
+Ejemplos:
+
+```sh
+curl -i http://localhost:8080/api/v1/games
+curl -i 'http://localhost:8080/api/v1/games?title=Catan&categoryId=1'
+curl -i http://localhost:8080/api/v1/games/1
+```
+
+### Categorías
+
+`GET /api/v1/categories` devuelve HTTP 200 con un arreglo de objetos
+con `id` y `name`, ordenados por nombre. Si no hay categorías, devuelve `[]`.
+
+```sh
+curl -i http://localhost:8080/api/v1/categories
+```
+
 ### Estado del servicio
 
 `GET /actuator/health` comprueba el estado del backend, incluida la conexión a MySQL. Si está disponible, devuelve HTTP 200 y `"status":"UP"`.
