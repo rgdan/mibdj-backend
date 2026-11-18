@@ -117,6 +117,187 @@ con `id` y `name`, ordenados por nombre. Si no hay categorías, devuelve `[]`.
 curl -i http://localhost:8080/api/v1/categories
 ```
 
+### Colección personal
+
+Juegos que posee un usuario (tabla `Posee`). Si el usuario no existe, todas
+estas rutas devuelven `404 Not Found`.
+
+| Método | Ruta | Respuesta |
+|---|---|---|
+| `GET` | `/api/v1/users/{userId}/collection` | `200 OK` con un arreglo, ordenado por título. Si la colección está vacía, devuelve `[]`. |
+| `GET` | `/api/v1/users/{userId}/collection/{gameId}` | `200 OK` con el juego; `404 Not Found` si no está en la colección. |
+| `POST` | `/api/v1/users/{userId}/collection` | `201 Created` con el juego agregado; `404` si el juego no existe; `409 Conflict` si ya estaba en la colección. |
+| `PUT` | `/api/v1/users/{userId}/collection/{gameId}` | `200 OK` con el juego actualizado; `404` si no está en la colección. |
+| `DELETE` | `/api/v1/users/{userId}/collection/{gameId}` | `204 No Content`; `404` si no está en la colección. |
+
+El listado acepta el filtro opcional `status` (`nuevo`, `usado` o `prestado`).
+
+Cuerpo de `POST`:
+
+| Campo | Tipo | Notas |
+|---|---|---|
+| `gameId` | integer | Obligatorio. |
+| `status` | string | Obligatorio: `nuevo`, `usado` o `prestado`. Se ignoran mayúsculas y espacios externos. |
+| `date` | string, `YYYY-MM-DD` | Opcional; fecha de adquisición. Si se omite, se usa la fecha de hoy. No puede ser futura. |
+
+`PUT` recibe `status` (obligatorio) y `date` (opcional; si se omite, se
+conserva la fecha guardada). Un valor inválido devuelve `400 Bad Request`.
+
+Campos de la respuesta:
+
+| Campo JSON | Tipo | Columna en MySQL |
+|---|---|---|
+| `gameId` | integer | `Posee.id_juego` |
+| `title` | string | `Juego.titulo` |
+| `publisher` | string | `Juego.editorial` |
+| `date` | string, `YYYY-MM-DD` | `Posee.fecha` |
+| `status` | string | `Posee.estado` |
+
+```sh
+curl -i http://localhost:8080/api/v1/users/1/collection
+curl -i 'http://localhost:8080/api/v1/users/1/collection?status=usado'
+curl -i http://localhost:8080/api/v1/users/1/collection \
+  -H 'Content-Type: application/json' \
+  -d '{"gameId":8,"status":"nuevo","date":"2026-11-17"}'
+curl -i -X PUT http://localhost:8080/api/v1/users/1/collection/8 \
+  -H 'Content-Type: application/json' \
+  -d '{"status":"prestado"}'
+curl -i -X DELETE http://localhost:8080/api/v1/users/1/collection/8
+```
+
+Respuesta del `POST` anterior:
+
+```json
+{
+  "gameId": 8,
+  "title": "Pandemic",
+  "publisher": "Z-Man Games",
+  "date": "2026-11-17",
+  "status": "nuevo"
+}
+```
+
+### Lista de deseos
+
+Juegos que un usuario quiere conseguir, con una prioridad de 1 a 3 (tabla
+`Desea`). Si el usuario no existe, todas estas rutas devuelven `404 Not Found`.
+
+| Método | Ruta | Respuesta |
+|---|---|---|
+| `GET` | `/api/v1/users/{userId}/wishlist` | `200 OK` con un arreglo ordenado por prioridad (1 primero) y después por fecha, de la más reciente a la más antigua. Si está vacía, devuelve `[]`. |
+| `GET` | `/api/v1/users/{userId}/wishlist/{gameId}` | `200 OK` con el juego; `404 Not Found` si no está en la lista. |
+| `POST` | `/api/v1/users/{userId}/wishlist` | `201 Created` con el juego agregado; `404` si el juego no existe; `409 Conflict` si ya estaba en la lista. |
+| `PUT` | `/api/v1/users/{userId}/wishlist/{gameId}` | `200 OK` con el juego actualizado; `404` si no está en la lista. |
+| `DELETE` | `/api/v1/users/{userId}/wishlist/{gameId}` | `204 No Content`; `404` si no está en la lista. |
+
+El listado acepta el filtro opcional `priority` (1, 2 o 3).
+
+Cuerpo de `POST`:
+
+| Campo | Tipo | Notas |
+|---|---|---|
+| `gameId` | integer | Obligatorio. |
+| `priority` | integer | Obligatorio: 1, 2 o 3. |
+| `date` | string, `YYYY-MM-DD` | Opcional; si se omite, se usa la fecha de hoy. No puede ser futura. |
+
+`PUT` recibe `priority` (obligatorio) y `date` (opcional; si se omite, se
+conserva la fecha guardada). Un valor inválido devuelve `400 Bad Request`.
+
+Campos de la respuesta:
+
+| Campo JSON | Tipo | Columna en MySQL |
+|---|---|---|
+| `gameId` | integer | `Desea.id_juego` |
+| `title` | string | `Juego.titulo` |
+| `publisher` | string | `Juego.editorial` |
+| `priority` | integer | `Desea.prioridad` |
+| `date` | string, `YYYY-MM-DD` | `Desea.fecha` |
+
+```sh
+curl -i http://localhost:8080/api/v1/users/1/wishlist
+curl -i 'http://localhost:8080/api/v1/users/1/wishlist?priority=2'
+curl -i http://localhost:8080/api/v1/users/1/wishlist \
+  -H 'Content-Type: application/json' \
+  -d '{"gameId":5,"priority":1}'
+curl -i -X PUT http://localhost:8080/api/v1/users/1/wishlist/5 \
+  -H 'Content-Type: application/json' \
+  -d '{"priority":3}'
+curl -i -X DELETE http://localhost:8080/api/v1/users/1/wishlist/5
+```
+
+### Valoraciones
+
+Calificaciones de 1 a 10 y comentarios opcionales de los usuarios sobre los
+juegos (tabla `Valora`).
+
+| Método | Ruta | Respuesta |
+|---|---|---|
+| `GET` | `/api/v1/games/{gameId}/ratings` | `200 OK` con todas las valoraciones del juego, su promedio y cantidad; `404 Not Found` si el juego no existe. |
+| `GET` | `/api/v1/users/{userId}/ratings/{gameId}` | `200 OK` con la valoración del usuario; `404` si el usuario o el juego no existen o si el usuario todavía no lo ha valorado. |
+| `PUT` | `/api/v1/users/{userId}/ratings/{gameId}` | `201 Created` si el usuario no había valorado el juego; `200 OK` si reemplaza su valoración anterior; `404` si el usuario o el juego no existen. |
+
+Cuerpo de `PUT`:
+
+| Campo | Tipo | Notas |
+|---|---|---|
+| `rating` | integer | Obligatorio, de 1 a 10. |
+| `comment` | string | Opcional, máximo 255 caracteres. Si se omite o está vacío, se guarda sin comentario (`null`). |
+
+Un valor inválido devuelve `400 Bad Request`.
+
+Campos de cada valoración:
+
+| Campo JSON | Tipo | Columna en MySQL |
+|---|---|---|
+| `userId` | integer | `Valora.id_usuario` |
+| `userName` | string | `Usuario.nombre` |
+| `gameId` | integer | `Valora.id_juego` |
+| `gameTitle` | string | `Juego.titulo` |
+| `rating` | integer | `Valora.calificacion` |
+| `comment` | string o `null` | `Valora.comentario` |
+
+`GET /api/v1/games/{gameId}/ratings` devuelve un objeto con `gameId`,
+`gameTitle`, `average` (promedio con un decimal, `null` si no hay
+valoraciones), `count` y `ratings` (arreglo ordenado de la calificación más
+alta a la más baja).
+
+```sh
+curl -i http://localhost:8080/api/v1/games/1/ratings
+curl -i http://localhost:8080/api/v1/users/1/ratings/1
+curl -i -X PUT http://localhost:8080/api/v1/users/5/ratings/1 \
+  -H 'Content-Type: application/json' \
+  -d '{"rating":8,"comment":"Muy buenas partidas"}'
+```
+
+Respuesta de las valoraciones de Catan con los datos de ejemplo:
+
+```json
+{
+  "gameId": 1,
+  "gameTitle": "Catan",
+  "average": 8.0,
+  "count": 2,
+  "ratings": [
+    {
+      "userId": 1,
+      "userName": "Ana Mora",
+      "gameId": 1,
+      "gameTitle": "Catan",
+      "rating": 9,
+      "comment": "Excelente, siempre genera negociaciones divertidas y es muy estratégico"
+    },
+    {
+      "userId": 3,
+      "userName": "María Fernández",
+      "gameId": 1,
+      "gameTitle": "Catan",
+      "rating": 7,
+      "comment": null
+    }
+  ]
+}
+```
+
 ### Estado del servicio
 
 `GET /actuator/health` comprueba el estado del backend, incluida la conexión a MySQL. Si está disponible, devuelve HTTP 200 y `"status":"UP"`.
