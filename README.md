@@ -78,7 +78,8 @@ src/main/
 ├── java/teccr/mibdj/
 │   ├── api/          Controladores y cuerpos de entrada
 │   ├── service/      Validaciones y transacciones
-│   ├── repository/   Consultas SQL con JdbcTemplate
+│   ├── repository/   Interfaces de acceso a datos
+│   │   └── jdbc/     Implementaciones SQL con JdbcTemplate
 │   └── data/         Objetos de respuesta
 └── resources/
     ├── application.properties

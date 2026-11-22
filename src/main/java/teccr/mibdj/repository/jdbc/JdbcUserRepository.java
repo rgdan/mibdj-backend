@@ -1,4 +1,6 @@
-package teccr.mibdj.repository;
+package teccr.mibdj.repository.jdbc;
+
+import teccr.mibdj.repository.UserRepository;
 
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
