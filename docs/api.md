@@ -1,18 +1,26 @@
 # Rutas de la API de MiBDJ
 
-[Volver al README](../README.md)
+[README](../README.md) · [Configuración local](setup.md)
 
-## API actual
+[Usuarios](#usuarios) · [Acceso](#acceso-por-email) · [Juegos](#juegos) · [Categorías](#categorías) · [Colección](#colección-personal) · [Wishlist](#lista-de-deseos) · [Valoraciones](#valoraciones) · [Lugares](#lugares) · [Partidas](#partidas) · [Estadísticas](#estadísticas-de-usuario)
 
-### URL base
+## URL base
 
 ```text
 http://localhost:8080
 ```
 
-Las respuestas usan JSON. Las rutas consultan la base de datos 'juegos_mesadb' mediante repositorios con 'JdbcTemplate' y no requieren una sesión iniciada.
+Las rutas consultan `juegos_mesadb` mediante repositorios con `JdbcTemplate`.
+Los cuerpos de entrada y las respuestas con contenido usan JSON; las fechas
+usan `YYYY-MM-DD`. Los ejemplos parten de los datos de `data.sql` y del
+puerto predeterminado `8080`.
 
-### Usuarios
+Las rutas no requieren una sesión iniciada. El pseudologin devuelve el ID
+que el frontend incluye en las rutas; no autentica ni autoriza las solicitudes.
+Los cuerpos de `POST` y `PUT` se envían con `Content-Type: application/json`.
+Una respuesta `204 No Content` no tiene cuerpo.
+
+## Usuarios
 
 | Método | Ruta | Respuesta |
 |---|---|---|
@@ -49,7 +57,7 @@ Respuesta del detalle del usuario `1` del seed:
 }
 ```
 
-### Acceso por email
+## Acceso por email
 
 `POST /api/v1/session` busca un usuario precargado por su email y devuelve
 los mismos campos que el detalle de usuario.
@@ -71,7 +79,7 @@ Se quitan los espacios al principio y al final del email antes de validarlo.
 Es un pseudologin: no pide contraseña, no genera tokens ni cookies de sesión
 y no crea usuarios.
 
-### Juegos
+## Juegos
 
 | Método | Ruta | Respuesta |
 |---|---|---|
@@ -108,7 +116,7 @@ curl -i 'http://localhost:8080/api/v1/games?title=Catan&categoryId=1'
 curl -i http://localhost:8080/api/v1/games/1
 ```
 
-### Categorías
+## Categorías
 
 `GET /api/v1/categories` devuelve HTTP 200 con un arreglo de objetos
 con `id` y `name`, ordenados por nombre. Si no hay categorías, devuelve `[]`.
@@ -117,7 +125,7 @@ con `id` y `name`, ordenados por nombre. Si no hay categorías, devuelve `[]`.
 curl -i http://localhost:8080/api/v1/categories
 ```
 
-### Colección personal
+## Colección personal
 
 Juegos que posee un usuario (tabla `Posee`). Si el usuario no existe, todas
 estas rutas devuelven `404 Not Found`.
@@ -131,6 +139,7 @@ estas rutas devuelven `404 Not Found`.
 | `DELETE` | `/api/v1/users/{userId}/collection/{gameId}` | `204 No Content`; `404` si no está en la colección. |
 
 El listado acepta el filtro opcional `status` (`nuevo`, `usado` o `prestado`).
+Un estado sin coincidencias devuelve `[]`.
 
 Cuerpo de `POST`:
 
@@ -142,6 +151,8 @@ Cuerpo de `POST`:
 
 `PUT` recibe `status` (obligatorio) y `date` (opcional; si se omite, se
 conserva la fecha guardada). Un valor inválido devuelve `400 Bad Request`.
+La actualización usa `PUT`; no hay una ruta `PATCH`. Eliminar un elemento
+quita la relación con el usuario y conserva el juego en el catálogo.
 
 Campos de la respuesta:
 
@@ -177,7 +188,7 @@ Respuesta del `POST` anterior:
 }
 ```
 
-### Lista de deseos
+## Lista de deseos
 
 Juegos que un usuario quiere conseguir, con una prioridad de 1 a 3 (tabla
 `Desea`). Si el usuario no existe, todas estas rutas devuelven `404 Not Found`.
@@ -191,6 +202,8 @@ Juegos que un usuario quiere conseguir, con una prioridad de 1 a 3 (tabla
 | `DELETE` | `/api/v1/users/{userId}/wishlist/{gameId}` | `204 No Content`; `404` si no está en la lista. |
 
 El listado acepta el filtro opcional `priority` (1, 2 o 3).
+Las prioridades son `1` baja, `2` media y `3` alta. El orden actual es
+ascendente: primero la prioridad baja. Un filtro sin coincidencias devuelve `[]`.
 
 Cuerpo de `POST`:
 
@@ -202,6 +215,8 @@ Cuerpo de `POST`:
 
 `PUT` recibe `priority` (obligatorio) y `date` (opcional; si se omite, se
 conserva la fecha guardada). Un valor inválido devuelve `400 Bad Request`.
+La actualización usa `PUT`; no hay una ruta `PATCH`. Eliminar un elemento
+quita la relación con el usuario y conserva el juego en el catálogo.
 
 Campos de la respuesta:
 
@@ -225,7 +240,7 @@ curl -i -X PUT http://localhost:8080/api/v1/users/1/wishlist/5 \
 curl -i -X DELETE http://localhost:8080/api/v1/users/1/wishlist/5
 ```
 
-### Valoraciones
+## Valoraciones
 
 Calificaciones de 1 a 10 y comentarios opcionales de los usuarios sobre los
 juegos (tabla `Valora`).
@@ -244,6 +259,9 @@ Cuerpo de `PUT`:
 | `comment` | string | Opcional, máximo 255 caracteres. Si se omite o está vacío, se guarda sin comentario (`null`). |
 
 Un valor inválido devuelve `400 Bad Request`.
+`PUT` guarda la valoración completa: si se omite `comment`, elimina el
+comentario anterior. Enviá números enteros para `rating` y `priority`;
+la conversión JSON actual puede truncar valores decimales antes de validarlos.
 
 Campos de cada valoración:
 
@@ -298,48 +316,98 @@ Respuesta de las valoraciones de Catan con los datos de ejemplo:
 }
 ```
 
-### Lugares
+## Lugares
 
-Catálogo de lugares registrados donde se juegan las partidas (tabla `Lugar`).
+Lugares precargados del usuario para el selector al registrar una partida
+(tabla `Lugar`).
 
 | Método | Ruta | Respuesta |
 |---|---|---|
-| `GET` | `/api/v1/places` | `200 OK` con un arreglo de lugares. Si no hay lugares registrados, devuelve `[]`. |
+| `GET` | `/api/v1/users/{id}/places` | `200 OK` con los lugares del usuario, ordenados por nombre; `[]` si no tiene lugares; `404 Not Found` si el usuario no existe. |
 
 Campos de la respuesta:
 
 | Campo JSON | Tipo | Columna en MySQL |
 |---|---|---|
-| `id` | integer | `id_lugar` |
+| `placeId` | integer | `id_lugar` |
 | `name` | string | `nombre` |
-| `type` | string | `tipo` |
 | `address` | string | `direccion` |
 
 ```sh
-curl -i http://localhost:8080/api/v1/places
+curl -i http://localhost:8080/api/v1/users/1/places
 ```
 
+Respuesta para el usuario `1` del seed:
 
-### Partidas
+```json
+[
+  {
+    "placeId": 1,
+    "name": "Casa de Ana",
+    "address": "Alajuela centro, 200 m norte de la catedral"
+  }
+]
+```
+
+## Partidas
 
 Historial, detalle y registro transaccional de partidas jugadas (tablas `Partida`, `Participa`, `Juego`, `Lugar` y vista `vw_partidas_usuario`). Si el usuario no existe, estas rutas devuelven `404 Not Found`.
 
 | Método | Ruta | Respuesta |
 |---|---|---|
-| `GET` | `/api/v1/users/{userId}/matches` | `200 OK` con el historial de partidas del usuario consultando `vw_partidas_usuario`. Si no ha jugado partidas, devuelve `[]`. |
-| `GET` | `/api/v1/users/{userId}/matches/{matchId}` | `200 OK` con el detalle de la partida y sus participantes; `404 Not Found` si la partida no existe o el usuario no participa en ella. |
-| `POST` | `/api/v1/users/{userId}/matches` | `201 Created` con la partida creada; `400` o `404` si algún dato o participante es inválido (revierte toda la transacción sin dejar datos parciales). |
+| `GET` | `/api/v1/users/{userId}/matches` | `200 OK` con las partidas que organizó o jugó el usuario, sin duplicados, consultando `vw_partidas_usuario`; `[]` si no tiene historial. |
+| `GET` | `/api/v1/users/{userId}/matches/{matchId}` | `200 OK` con el detalle y los participantes; `404 Not Found` si la partida no existe o el usuario no es organizador ni participante. |
+| `POST` | `/api/v1/users/{userId}/matches` | `201 Created` con la partida creada; `400` para las validaciones de entrada descritas abajo y `404` para referencias inexistentes. |
 
 Cuerpo de `POST`:
 
 | Campo | Tipo | Notas |
 |---|---|---|
 | `gameId` | integer | Obligatorio. Debe existir en `Juego`. |
-| `placeId` | integer | Obligatorio. Debe existir en `Lugar`. |
+| `placeId` | integer | Obligatorio. Debe existir en `Lugar` y pertenecer al organizador indicado en la ruta. |
 | `fecha` | string, `YYYY-MM-DD` | Obligatorio. |
 | `duracionMin` | integer | Obligatorio, mayor a 0. |
-| `notas` | string | Opcional. |
-| `participantes` | arreglo de objetos | Obligatorio, al menos un participante con `userId` (integer), `puntos` (integer) y `ganador` (boolean). No admite usuarios duplicados ni inexistentes. |
+| `notas` | string | Opcional. Se quitan espacios externos; la columna admite hasta 255 caracteres. |
+| `participantes` | arreglo de objetos | Obligatorio, con al menos un participante. No admite IDs de usuario duplicados ni inexistentes. |
+
+Cada participante tiene estos campos obligatorios:
+
+| Campo | Tipo | Validación |
+|---|---|---|
+| `userId` | integer | Debe existir en `Usuario`. |
+| `puntos` | integer | Mayor o igual a 0. |
+| `ganador` | boolean | `true` o `false`. Se permiten varios ganadores o ninguno. |
+
+El organizador no se agrega automáticamente a `participantes`: incluí su ID
+si también jugó. El ID de la partida se genera en el servidor. `Partida` y
+sus filas de `Participa` se guardan en una transacción; si falla una escritura,
+se revierte la operación completa.
+
+Respuestas de partidas:
+
+| Campo JSON | Tipo | Dónde aparece |
+|---|---|---|
+| `matchId` | integer | Listado, detalle y creación. |
+| `userId` | integer | Listado, detalle y creación; identifica al organizador. |
+| `gameId` | integer | Detalle y creación. |
+| `gameTitle` | string | Listado y detalle. |
+| `placeId` | integer | Detalle y creación. |
+| `placeName` | string | Listado y detalle. |
+| `fecha` | string, `YYYY-MM-DD` | Listado, detalle y creación. |
+| `duracionMin` | integer | Listado, detalle y creación. |
+| `notas` | string | Detalle y creación, cuando no es `null`. |
+| `participantesCount` | integer | Listado. |
+| `participantes` | arreglo de objetos | Detalle y creación; cada elemento contiene `userId`, `puntos` y `ganador`. |
+
+Los campos `null` se omiten en las respuestas de partidas. El historial se
+ordena por fecha e ID descendentes. En el detalle, los participantes se
+ordenan por ganador, puntos descendentes e ID ascendente.
+
+| Error | Casos |
+|---|---|
+| `400 Bad Request` | Campos obligatorios ausentes, fecha con formato inválido, duración no positiva, puntos negativos, participantes vacíos o repetidos, o lugar de otro organizador. |
+| `404 Not Found` | Organizador, juego, lugar o usuario participante inexistentes. En el detalle, también una partida ajena o inexistente. |
+| `500 Internal Server Error` | Actualmente, notas que exceden 255 caracteres o elementos `null` en participantes. La generación con `MAX(id_partida) + 1` también puede fallar con registros simultáneos. |
 
 ```sh
 curl -i http://localhost:8080/api/v1/users/1/matches
@@ -360,9 +428,11 @@ curl -i http://localhost:8080/api/v1/users/1/matches \
 ```
 
 
-### Estadísticas de usuario
+## Estadísticas de usuario
 
-Resumen de actividad del usuario en sus partidas registradas (tablas `Partida`, `Participa`, `Juego` y `Usuario`).
+Resumen de las partidas donde el usuario figura en `Participa` (tablas
+`Partida`, `Participa`, `Juego` y `Usuario`). Organizar una partida sin estar
+incluido como participante no la incorpora a estas estadísticas.
 
 | Método | Ruta | Respuesta |
 |---|---|---|
@@ -375,67 +445,17 @@ Campos de la respuesta:
 | Campo JSON | Tipo | Descripción |
 |---|---|---|
 | `mostPlayedGames` | arreglo | Juegos ordenados de mayor a menor por cantidad de partidas jugadas (`gameId`, `gameTitle`, `matchesPlayed`). |
-| `averageDurationByGame` | arreglo | Duración promedio en minutos por cada juego jugado (`gameId`, `gameTitle`, `averageDurationMin`). |
-| `frequentCompanions` | arreglo | Otros usuarios con quienes ha compartido partidas, ordenados por frecuencia (`userId`, `userName`, `sharedMatches`). |
+| `averageDurationByGame` | arreglo | Duración promedio en minutos por juego, redondeada a dos decimales y ordenada de mayor a menor (`gameId`, `gameTitle`, `averageDurationMin`). |
+| `frequentCompanions` | arreglo | Otros usuarios con quienes ha compartido partidas, ordenados por frecuencia (`userId`, `userName`, `sharedMatches`). Excluye al propio usuario y distingue compañeros por ID. |
+
+Cada partida se cuenta una sola vez. En caso de empate, las listas se
+ordenan por título del juego o nombre del compañero, respectivamente.
 
 ```sh
 curl -i http://localhost:8080/api/v1/users/1/stats
 ```
 
 
-### Estado del servicio
+## Estado del servicio
 
 `GET /actuator/health` comprueba el estado del backend, incluida la conexión a MySQL. Si está disponible, devuelve HTTP 200 y `"status":"UP"`.
-
-## API anterior
-
-Referencia histórica del ejemplo de usuarios. Consultaba la tabla `users`; este contrato no corresponde al esquema actual de MiBDJ. Las rutas `POST`, `PATCH` y `DELETE` de esta sección fueron eliminadas, al igual que los campos `userName`, `type` y `createdAt`. Las dos rutas GET conservan su URL, pero ahora devuelven los campos de la API actual.
-
-### Usuarios
-
-
-| Metodo | Endpoint | Descripcion | Respuesta exitosa |
-|---|---|---|---|
-| `GET` | `/api/v1/users` | Obtener todos los usuarios. | `200 OK`, arreglo JSON |
-| `GET` | `/api/v1/users/{id}` | Obtener un usuario por su ID. | `200 OK`, objeto de usuario; `404 Not Found` si no existe |
-| `POST` | `/api/v1/users` | Crear un usuario. | `201 Created`, objeto del usuario creado |
-| `PATCH` | `/api/v1/users/{id}` | Actualizar los campos enviados que sean editables. | `200 OK`, objeto del usuario actualizado |
-| `DELETE` | `/api/v1/users/{id}` | Eliminar un usuario. | `204 No Content` |
-
-Campos JSON de usuario:
-
-| Campo | Tipo | Notas |
-|---|---|---|
-| `id` | integer | Lo genera el servidor. |
-| `userName` | string | Obligatorio al crear un usuario; debe ser unico. |
-| `name` | string | Opcional. |
-| `email` | string | Opcional. |
-| `type` | string | `ADMIN` o `REGULAR`. |
-| `createdAt` | string | Fecha y hora administradas por el servidor, en formato ISO-8601. |
-
-`PATCH` permite actualizar `name`, `email` y `type`. Los campos omitidos no cambian. Este endpoint no modifica `userName`.
-
-Crear un usuario:
-
-```http
-POST /api/v1/users
-Content-Type: application/json
-
-{
-  "userName": "ana_soto",
-  "name": "Ana Soto",
-  "email": "asoto@example.com",
-  "type": "REGULAR"
-}
-```
-
-Actualizar el correo de un usuario:
-
-```http
-PATCH /api/v1/users/1
-Content-Type: application/json
-
-{
-  "email": "ana.new@example.com"
-}
-```
