@@ -14,26 +14,11 @@ Un catálogo de juegos de mesa con colección personal, lista de deseos y
 valoraciones. Registrá tus partidas, los participantes, sus puntos y ganadores;
 consultá el historial y las estadísticas de juego de cada usuario.
 
-[Inicio local](#inicio-local) · [Funcionalidades](#funcionalidades) · [Estructura](#estructura) · [Base de datos](#base-de-datos)
+[Inicio local](#inicio-local) · [Estructura](#estructura) · [Base de datos](#base-de-datos)
 
 ## Inicio local
 
 [Compilar, levantar MySQL y arrancar el backend](docs/setup.md).
-
-## Funcionalidades
-
-| Área | Qué podés hacer | Referencia |
-|---|---|---|
-| Usuarios | Entrar con el email de un usuario precargado y consultar su perfil. | [Acceso por email](docs/api.md#acceso-por-email) |
-| Catálogo | Buscar juegos por título, filtrar por categoría y consultar sus detalles. | [Juegos](docs/api.md#juegos) |
-| Colección | Agregar juegos propios, guardar fecha y estado, actualizar o quitar elementos. | [Colección personal](docs/api.md#colección-personal) |
-| Wishlist | Guardar juegos deseados con fecha y prioridad. | [Lista de deseos](docs/api.md#lista-de-deseos) |
-| Valoraciones | Guardar una nota y un comentario; consultar valoraciones y promedios. | [Valoraciones](docs/api.md#valoraciones) |
-| Partidas | Elegir un lugar del usuario, registrar participantes y consultar historial y detalle. | [Partidas](docs/api.md#partidas) |
-| Estadísticas | Consultar juegos más jugados, duración promedio y compañeros frecuentes. | [Estadísticas](docs/api.md#estadísticas-de-usuario) |
-
-El acceso es un pseudologin por email: usa usuarios precargados, sin contraseña
-ni tokens. Las rutas reciben el ID de usuario y no requieren autenticación.
 
 ## Estructura
 
