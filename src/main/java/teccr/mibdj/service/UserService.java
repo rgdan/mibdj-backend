@@ -1,5 +1,8 @@
 package teccr.mibdj.service;
 
+
+import org.springframework.http.HttpStatus;
+import org.springframework.web.server.ResponseStatusException;
 import org.springframework.stereotype.Service;
 import teccr.mibdj.data.User;
 import teccr.mibdj.repository.UserRepository;
@@ -32,5 +35,17 @@ public class UserService {
             return Optional.empty();
         }
         return userRepository.findById(id);
+    }
+
+    public teccr.mibdj.api.UsersController.UserStatsResponse getUserStats(long userId) {
+        if (userRepository.findById(userId).isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Usuario no encontrado");
+        }
+
+        return new teccr.mibdj.api.UsersController.UserStatsResponse(
+                userRepository.findMostPlayedGames(userId),
+                userRepository.findAverageDurationByGame(userId),
+                userRepository.findFrequentCompanions(userId)
+        );
     }
 }

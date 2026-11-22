@@ -45,6 +45,35 @@ public class UsersController {
         return ResponseEntity.ok(places);
     }
 
+    @GetMapping("/users/{userId}/stats")
+    public ResponseEntity<UserStatsResponse> getUserStats(@PathVariable Long userId) {
+        return ResponseEntity.ok(userService.getUserStats(userId));
+    }
+
+    public record MostPlayedGame(
+            Long gameId,
+            String gameTitle,
+            Integer matchesPlayed) {
+    }
+
+    public record AverageDurationByGame(
+            Long gameId,
+            String gameTitle,
+            Double averageDurationMin) {
+    }
+
+    public record FrequentCompanion(
+            Long userId,
+            String userName,
+            Integer sharedMatches) {
+    }
+
+    public record UserStatsResponse(
+            List<MostPlayedGame> mostPlayedGames,
+            List<AverageDurationByGame> averageDurationByGame,
+            List<FrequentCompanion> frequentCompanions) {
+    }
+
     @PostMapping("/session")
     public ResponseEntity<User> login(@Valid @RequestBody SessionRequest request) {
         return userService.getUserByEmail(request.email())
