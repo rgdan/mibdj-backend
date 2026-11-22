@@ -10,7 +10,7 @@
 http://localhost:8080
 ```
 
-Las respuestas usan JSON. Las rutas de usuarios consultan la tabla `Usuario` con `JdbcTemplate` y no requieren una sesión iniciada.
+Las respuestas usan JSON. Las rutas consultan la base de datos 'juegos_mesadb' mediante repositorios con 'JdbcTemplate' y no requieren una sesión iniciada.
 
 ### Usuarios
 
@@ -297,6 +297,91 @@ Respuesta de las valoraciones de Catan con los datos de ejemplo:
   ]
 }
 ```
+
+### Lugares
+
+Catálogo de lugares registrados donde se juegan las partidas (tabla `Lugar`).
+
+| Método | Ruta | Respuesta |
+|---|---|---|
+| `GET` | `/api/v1/places` | `200 OK` con un arreglo de lugares. Si no hay lugares registrados, devuelve `[]`. |
+
+Campos de la respuesta:
+
+| Campo JSON | Tipo | Columna en MySQL |
+|---|---|---|
+| `id` | integer | `id_lugar` |
+| `name` | string | `nombre` |
+| `type` | string | `tipo` |
+| `address` | string | `direccion` |
+
+```sh
+curl -i http://localhost:8080/api/v1/places
+```
+
+
+### Partidas
+
+Historial, detalle y registro transaccional de partidas jugadas (tablas `Partida`, `Participa`, `Juego`, `Lugar` y vista `vw_partidas_usuario`). Si el usuario no existe, estas rutas devuelven `404 Not Found`.
+
+| Método | Ruta | Respuesta |
+|---|---|---|
+| `GET` | `/api/v1/users/{userId}/matches` | `200 OK` con el historial de partidas del usuario consultando `vw_partidas_usuario`. Si no ha jugado partidas, devuelve `[]`. |
+| `GET` | `/api/v1/users/{userId}/matches/{matchId}` | `200 OK` con el detalle de la partida y sus participantes; `404 Not Found` si la partida no existe o el usuario no participa en ella. |
+| `POST` | `/api/v1/users/{userId}/matches` | `201 Created` con la partida creada; `400` o `404` si algún dato o participante es inválido (revierte toda la transacción sin dejar datos parciales). |
+
+Cuerpo de `POST`:
+
+| Campo | Tipo | Notas |
+|---|---|---|
+| `gameId` | integer | Obligatorio. Debe existir en `Juego`. |
+| `placeId` | integer | Obligatorio. Debe existir en `Lugar`. |
+| `fecha` | string, `YYYY-MM-DD` | Obligatorio. |
+| `duracionMin` | integer | Obligatorio, mayor a 0. |
+| `notas` | string | Opcional. |
+| `participantes` | arreglo de objetos | Obligatorio, al menos un participante con `userId` (integer), `puntos` (integer) y `ganador` (boolean). No admite usuarios duplicados ni inexistentes. |
+
+```sh
+curl -i http://localhost:8080/api/v1/users/1/matches
+curl -i http://localhost:8080/api/v1/users/1/matches/1
+curl -i http://localhost:8080/api/v1/users/1/matches \
+  -H 'Content-Type: application/json' \
+  -d '{
+    "fecha": "2026-11-22",
+    "duracionMin": 65,
+    "notas": "Partida de prueba",
+    "gameId": 1,
+    "placeId": 1,
+    "participantes": [
+      {"userId": 1, "puntos": 10, "ganador": true},
+      {"userId": 2, "puntos": 8, "ganador": false}
+    ]
+  }'
+```
+
+
+### Estadísticas de usuario
+
+Resumen de actividad del usuario en sus partidas registradas (tablas `Partida`, `Participa`, `Juego` y `Usuario`).
+
+| Método | Ruta | Respuesta |
+|---|---|---|
+| `GET` | `/api/v1/users/{userId}/stats` | `200 OK` con las estadísticas del usuario; `404 Not Found` si el usuario no existe. |
+
+Si el usuario no tiene partidas registradas, los tres arreglos se devuelven vacíos (`[]`).
+
+Campos de la respuesta:
+
+| Campo JSON | Tipo | Descripción |
+|---|---|---|
+| `mostPlayedGames` | arreglo | Juegos ordenados de mayor a menor por cantidad de partidas jugadas (`gameId`, `gameTitle`, `matchesPlayed`). |
+| `averageDurationByGame` | arreglo | Duración promedio en minutos por cada juego jugado (`gameId`, `gameTitle`, `averageDurationMin`). |
+| `frequentCompanions` | arreglo | Otros usuarios con quienes ha compartido partidas, ordenados por frecuencia (`userId`, `userName`, `sharedMatches`). |
+
+```sh
+curl -i http://localhost:8080/api/v1/users/1/stats
+```
+
 
 ### Estado del servicio
 
