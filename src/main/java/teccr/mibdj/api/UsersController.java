@@ -45,6 +45,7 @@ public class UsersController {
         return ResponseEntity.ok(places);
     }
 
+
     @GetMapping("/users/{userId}/stats")
     public ResponseEntity<UserStatsResponse> getUserStats(@PathVariable Long userId) {
         return ResponseEntity.ok(userService.getUserStats(userId));

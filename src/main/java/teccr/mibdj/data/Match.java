@@ -6,7 +6,7 @@ import java.time.LocalDate;
 import java.util.List;
 
 @Data
-@JsonInclude(JsonInclude.Include.NON_NULL)
+@JsonInclude(JsonInclude.Include.NON_NULL)    // no refleja los valores NULL en el JSON
 public class Match {
     private Long matchId;
     private Long userId;

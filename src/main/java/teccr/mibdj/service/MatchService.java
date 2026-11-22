@@ -33,7 +33,7 @@ public class MatchService {
     @Transactional
     public Match createMatch(long organizerUserId, long gameId, long placeId, LocalDate fecha,
                              int duracionMin, String notas, List<MatchParticipant> participantes) {
-        // 1. Validar que no haya participantes repetidos -> 400
+
         Set<Long> uniqueUsers = new HashSet<>();
         for (MatchParticipant p : participantes) {
             if (!uniqueUsers.add(p.getUserId())) {
@@ -42,7 +42,7 @@ public class MatchService {
             }
         }
 
-        // 2. Validar existencia de referencias -> 404
+
         if (userRepository.findById(organizerUserId).isEmpty()) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Usuario organizador no encontrado");
         }
@@ -59,13 +59,13 @@ public class MatchService {
             }
         }
 
-        // 3. Validar que el lugar pertenezca al usuario organizador -> 400
+
         if (!matchRepository.placeBelongsToUser(placeId, organizerUserId)) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
                     "El lugar no pertenece al usuario organizador");
         }
 
-        // 4. Guardar Partida + Participa en una sola transacción
+
         return matchRepository.createMatch(
                 organizerUserId, gameId, placeId, fecha, duracionMin, notas, participantes
         );

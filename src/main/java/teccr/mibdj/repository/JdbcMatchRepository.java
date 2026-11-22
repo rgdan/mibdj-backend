@@ -41,10 +41,10 @@ public class JdbcMatchRepository implements MatchRepository {
     }
 
     @Override
-    public Match createMatch(long organizerUserId, long gameId, long placeId, LocalDate fecha,
+    public Match createMatch(long UserId, long gameId, long placeId, LocalDate fecha,
                              int duracionMin, String notas, List<MatchParticipant> participantes) {
         Long nextMatchId = jdbcTemplate.queryForObject(
-                "SELECT COALESCE(MAX(id_partida), 0) + 1 FROM Partida",
+                "SELECT COALESCE(MAX(id_partida), 0) + 1 FROM Partida",    // a falta de un increment desde el schema
                 Long.class
         );
         long matchId = (nextMatchId != null) ? nextMatchId : 1L;
@@ -61,7 +61,7 @@ public class JdbcMatchRepository implements MatchRepository {
                         Date.valueOf(fecha),
                         duracionMin,
                         (notas != null && !notas.isBlank()) ? notas : null,
-                        organizerUserId,
+                        UserId,
                         gameId,
                         placeId
                 },
@@ -93,7 +93,7 @@ public class JdbcMatchRepository implements MatchRepository {
 
         Match match = new Match();
         match.setMatchId(matchId);
-        match.setUserId(organizerUserId);
+        match.setUserId(UserId);
         match.setGameId(gameId);
         match.setPlaceId(placeId);
         match.setFecha(fecha);
@@ -103,12 +103,13 @@ public class JdbcMatchRepository implements MatchRepository {
         return match;
     }
 
+    // Se completaron datos que no estan en la vista con joins
     @Override
     public List<Match> findMatchesByUserId(long userId) {
         String sql = """
                 SELECT DISTINCT
                     v.partida AS id_partida,
-                    p.id_usuario AS id_organizador,
+                    p.id_usuario,
                     v.juego AS titulo_juego,
                     v.lugar AS nombre_lugar,
                     p.fecha,
@@ -124,7 +125,7 @@ public class JdbcMatchRepository implements MatchRepository {
         return jdbcTemplate.query(sql, (rs, rowNum) -> {
             Match match = new Match();
             match.setMatchId(rs.getLong("id_partida"));
-            match.setUserId(rs.getLong("id_organizador"));
+            match.setUserId(rs.getLong("id_usuario"));
             match.setGameTitle(rs.getString("titulo_juego"));
             match.setPlaceName(rs.getString("nombre_lugar"));
             match.setFecha(rs.getDate("fecha").toLocalDate());
@@ -139,7 +140,7 @@ public class JdbcMatchRepository implements MatchRepository {
         String matchSql = """
                 SELECT
                     p.id_partida,
-                    p.id_usuario AS id_organizador,
+                    p.id_usuario ,
                     p.id_juego,
                     j.titulo AS titulo_juego,
                     p.id_lugar,
@@ -165,7 +166,7 @@ public class JdbcMatchRepository implements MatchRepository {
         List<Match> matches = jdbcTemplate.query(matchSql, (rs, rowNum) -> {
             Match match = new Match();
             match.setMatchId(rs.getLong("id_partida"));
-            match.setUserId(rs.getLong("id_organizador"));
+            match.setUserId(rs.getLong("id_usuario"));
             match.setGameId(rs.getLong("id_juego"));
             match.setGameTitle(rs.getString("titulo_juego"));
             match.setPlaceId(rs.getLong("id_lugar"));
