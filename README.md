@@ -18,40 +18,7 @@ consultá el historial y las estadísticas de juego de cada usuario.
 
 ## Inicio local
 
-Necesitás JDK 21 y Docker en ejecución. El repositorio incluye Maven Wrapper;
-la primera ejecución descarga Maven y sus dependencias.
-
-1. Seguí la [guía de configuración](docs/setup.md#mysql-con-docker) para crear
-   MySQL 8.4 e importar el esquema y los datos iniciales.
-2. Desde la raíz del backend, creá el archivo de configuración:
-
-   ```sh
-   cp .env.example .env
-   ```
-
-   Completá `DB_URL`, `DB_USR_NAME` y `DB_PWD` con la conexión a tu contenedor.
-   La guía incluye [valores de ejemplo para desarrollo local](docs/setup.md#3-configurar-la-conexión).
-
-3. Con MySQL listo, arrancá el backend:
-
-   ```sh
-   ./mvnw spring-boot:run
-   ```
-
-4. Comprobá el servicio y su conexión a la base:
-
-   ```sh
-   curl http://localhost:8080/actuator/health
-   ```
-
-   Debe responder `200 OK` con `"status":"UP"`. La API queda en
-   `http://localhost:8080`.
-
-Para compilar sin arrancar la aplicación ni necesitar MySQL:
-
-```sh
-./mvnw clean compile
-```
+[Compilar, levantar MySQL y arrancar el backend](docs/setup.md).
 
 ## Funcionalidades
 
@@ -101,6 +68,4 @@ el historial. El seed incluye 5 usuarios y 8 juegos de mesa.
 
 </details>
 
-Las instrucciones de [MySQL con Docker](docs/setup.md#mysql-con-docker)
-explican la importación inicial y cómo conservar los datos entre reinicios.
 Los contratos, ejemplos y límites actuales están en la [referencia de la API](docs/api.md).
