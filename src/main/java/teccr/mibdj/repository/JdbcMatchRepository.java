@@ -9,6 +9,7 @@ import java.sql.Date;
 import java.sql.Types;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public class JdbcMatchRepository implements MatchRepository {
@@ -100,5 +101,103 @@ public class JdbcMatchRepository implements MatchRepository {
         match.setNotas(notas);
         match.setParticipantes(participantes);
         return match;
+    }
+
+    @Override
+    public List<Match> findMatchesByUserId(long userId) {
+        String sql = """
+                SELECT DISTINCT
+                    v.partida AS id_partida,
+                    p.id_usuario AS id_organizador,
+                    v.juego AS titulo_juego,
+                    v.lugar AS nombre_lugar,
+                    p.fecha,
+                    p.duracion_min,
+                    v.participantes AS total_participantes
+                FROM vw_partidas_usuario v
+                JOIN Partida p ON v.partida = p.id_partida
+                LEFT JOIN Participa par ON p.id_partida = par.id_partida
+                WHERE p.id_usuario = ? OR par.id_usuario = ?
+                ORDER BY p.fecha DESC, v.partida DESC
+                """;
+
+        return jdbcTemplate.query(sql, (rs, rowNum) -> {
+            Match match = new Match();
+            match.setMatchId(rs.getLong("id_partida"));
+            match.setUserId(rs.getLong("id_organizador"));
+            match.setGameTitle(rs.getString("titulo_juego"));
+            match.setPlaceName(rs.getString("nombre_lugar"));
+            match.setFecha(rs.getDate("fecha").toLocalDate());
+            match.setDuracionMin(rs.getInt("duracion_min"));
+            match.setParticipantesCount(rs.getInt("total_participantes"));
+            return match;
+        }, userId, userId);
+    }
+
+    @Override
+    public Optional<Match> findMatchDetailForUser(long userId, long matchId) {
+        String matchSql = """
+                SELECT
+                    p.id_partida,
+                    p.id_usuario AS id_organizador,
+                    p.id_juego,
+                    j.titulo AS titulo_juego,
+                    p.id_lugar,
+                    l.nombre AS nombre_lugar,
+                    p.fecha,
+                    p.duracion_min,
+                    p.notas
+                FROM Partida p
+                JOIN Juego j ON p.id_juego = j.id_juego
+                JOIN Lugar l ON p.id_lugar = l.id_lugar
+                WHERE p.id_partida = ?
+                  AND (
+                      p.id_usuario = ?
+                      OR EXISTS (
+                          SELECT 1
+                          FROM Participa par
+                          WHERE par.id_partida = p.id_partida
+                            AND par.id_usuario = ?
+                      )
+                  )
+                """;
+
+        List<Match> matches = jdbcTemplate.query(matchSql, (rs, rowNum) -> {
+            Match match = new Match();
+            match.setMatchId(rs.getLong("id_partida"));
+            match.setUserId(rs.getLong("id_organizador"));
+            match.setGameId(rs.getLong("id_juego"));
+            match.setGameTitle(rs.getString("titulo_juego"));
+            match.setPlaceId(rs.getLong("id_lugar"));
+            match.setPlaceName(rs.getString("nombre_lugar"));
+            match.setFecha(rs.getDate("fecha").toLocalDate());
+            match.setDuracionMin(rs.getInt("duracion_min"));
+            match.setNotas(rs.getString("notas"));
+            return match;
+        }, matchId, userId, userId);
+
+        if (matches.isEmpty()) {
+            return Optional.empty();
+        }
+
+        Match match = matches.get(0);
+
+        String participantsSql = """
+                SELECT id_usuario, puntos, ganador
+                FROM Participa
+                WHERE id_partida = ?
+                ORDER BY ganador DESC, puntos DESC, id_usuario ASC
+                """;
+
+        List<MatchParticipant> participantes = jdbcTemplate.query(participantsSql, (rs, rowNum) -> {
+            MatchParticipant mp = new MatchParticipant();
+            mp.setUserId(rs.getLong("id_usuario"));
+            mp.setPuntos(rs.getInt("puntos"));
+            mp.setGanador(rs.getBoolean("ganador"));
+            return mp;
+        }, matchId);
+
+        match.setParticipantes(participantes);
+        return Optional.of(match);
     }
 }

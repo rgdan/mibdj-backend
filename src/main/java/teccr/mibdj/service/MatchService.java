@@ -70,4 +70,19 @@ public class MatchService {
                 organizerUserId, gameId, placeId, fecha, duracionMin, notas, participantes
         );
     }
+
+    public List<Match> getUserMatches(long userId) {
+        if (userRepository.findById(userId).isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Usuario no encontrado");
+        }
+        return matchRepository.findMatchesByUserId(userId);
+    }
+
+    public Match getUserMatchDetail(long userId, long matchId) {
+        if (userRepository.findById(userId).isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Usuario no encontrado");
+        }
+        return matchRepository.findMatchDetailForUser(userId, matchId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Partida no encontrada"));
+    }
 }

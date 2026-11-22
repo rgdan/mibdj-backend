@@ -25,6 +25,18 @@ public class MatchesController {
         this.matchService = matchService;
     }
 
+    @GetMapping
+    public ResponseEntity<List<Match>> getUserMatches(@PathVariable Long userId) {
+        return ResponseEntity.ok(matchService.getUserMatches(userId));
+    }
+
+    @GetMapping("/{matchId}")
+    public ResponseEntity<Match> getUserMatchDetail(
+            @PathVariable Long userId,
+            @PathVariable Long matchId) {
+        return ResponseEntity.ok(matchService.getUserMatchDetail(userId, matchId));
+    }
+
     @PostMapping
     public ResponseEntity<Match> createMatch(
             @PathVariable Long userId,
