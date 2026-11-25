@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 import teccr.mibdj.data.User;
 import teccr.mibdj.repository.UserRepository;
 
+import java.util.List;
 import java.util.Optional;
 
 /**
@@ -22,7 +23,7 @@ public class UserService {
         this.userRepository = userRepository;
     }
 
-    public Iterable<User> getAllUsers() {
+    public List<User> getAllUsers() {
         return userRepository.findAll();
     }
 
