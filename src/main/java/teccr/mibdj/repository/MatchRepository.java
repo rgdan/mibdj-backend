@@ -12,7 +12,7 @@ public interface MatchRepository {
 
     boolean placeBelongsToUser(long placeId, long userId);
 
-    Match createMatch(long UserId, long gameId, long placeId, LocalDate fecha,
+    Match createMatch(long userId, long gameId, long placeId, LocalDate fecha,
                       int duracionMin, String notas, List<MatchParticipant> participantes);
 
     List<Match> findMatchesByUserId(long userId);

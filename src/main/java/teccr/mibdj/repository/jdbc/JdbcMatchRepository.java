@@ -43,7 +43,7 @@ public class JdbcMatchRepository implements MatchRepository {
     }
 
     @Override
-    public Match createMatch(long UserId, long gameId, long placeId, LocalDate fecha,
+    public Match createMatch(long userId, long gameId, long placeId, LocalDate fecha,
                              int duracionMin, String notas, List<MatchParticipant> participantes) {
         Long nextMatchId = jdbcTemplate.queryForObject(
                 "SELECT COALESCE(MAX(id_partida), 0) + 1 FROM Partida",    // a falta de un increment desde el schema
@@ -63,7 +63,7 @@ public class JdbcMatchRepository implements MatchRepository {
                         Date.valueOf(fecha),
                         duracionMin,
                         (notas != null && !notas.isBlank()) ? notas : null,
-                        UserId,
+                        userId,
                         gameId,
                         placeId
                 },
@@ -95,7 +95,7 @@ public class JdbcMatchRepository implements MatchRepository {
 
         Match match = new Match();
         match.setMatchId(matchId);
-        match.setUserId(UserId);
+        match.setUserId(userId);
         match.setGameId(gameId);
         match.setPlaceId(placeId);
         match.setFecha(fecha);
