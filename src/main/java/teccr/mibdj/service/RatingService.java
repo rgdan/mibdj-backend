@@ -7,9 +7,7 @@ import org.springframework.web.server.ResponseStatusException;
 import teccr.mibdj.data.Game;
 import teccr.mibdj.data.GameRatings;
 import teccr.mibdj.data.Rating;
-import teccr.mibdj.repository.GameRepository;
 import teccr.mibdj.repository.RatingRepository;
-import teccr.mibdj.repository.UserRepository;
 
 import java.util.List;
 
@@ -20,15 +18,15 @@ import java.util.List;
 public class RatingService {
 
     private final RatingRepository ratingRepository;
-    private final UserRepository userRepository;
-    private final GameRepository gameRepository;
+    private final UserService userService;
+    private final GameService gameService;
 
     public RatingService(RatingRepository ratingRepository,
-                         UserRepository userRepository,
-                         GameRepository gameRepository) {
+                         UserService userService,
+                         GameService gameService) {
         this.ratingRepository = ratingRepository;
-        this.userRepository = userRepository;
-        this.gameRepository = gameRepository;
+        this.userService = userService;
+        this.gameService = gameService;
     }
 
     /** Resultado de guardar una valoración: indica si se creó o se actualizó. */
@@ -36,8 +34,7 @@ public class RatingService {
     }
 
     public GameRatings getGameRatings(Long gameId) {
-        Game game = gameRepository.findById(gameId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "El juego no existe"));
+        Game game = gameService.requireGame(gameId);
         List<Rating> ratings = ratingRepository.findByGame(gameId);
 
         GameRatings result = new GameRatings();
@@ -53,8 +50,8 @@ public class RatingService {
     }
 
     public Rating getUserRating(Long userId, Long gameId) {
-        requireUser(userId);
-        requireGame(gameId);
+        userService.requireUser(userId);
+        gameService.requireGame(gameId);
         return ratingRepository.findByUserAndGame(userId, gameId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
                         "El usuario todavía no ha valorado este juego"));
@@ -65,8 +62,8 @@ public class RatingService {
      */
     @Transactional
     public SaveResult saveRating(Long userId, Long gameId, Integer rating, String comment) {
-        requireUser(userId);
-        requireGame(gameId);
+        userService.requireUser(userId);
+        gameService.requireGame(gameId);
         boolean created = ratingRepository.update(userId, gameId, rating, comment) == 0;
         if (created) {
             ratingRepository.insert(userId, gameId, rating, comment);
@@ -75,15 +72,4 @@ public class RatingService {
         return new SaveResult(saved, created);
     }
 
-    private void requireUser(Long userId) {
-        if (userRepository.findById(userId).isEmpty()) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "El usuario no existe");
-        }
-    }
-
-    private void requireGame(Long gameId) {
-        if (gameRepository.findById(gameId).isEmpty()) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "El juego no existe");
-        }
-    }
 }

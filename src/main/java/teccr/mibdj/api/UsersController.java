@@ -40,9 +40,6 @@ public class UsersController {
 
     @GetMapping("/users/{id}/places")
     public ResponseEntity<List<Place>> getUserPlaces(@PathVariable Long id) {
-        if (userService.getUserById(id).isEmpty()) {
-            return ResponseEntity.notFound().build();
-        }
         List<Place> places = placeService.getPlacesByUserId(id);
         return ResponseEntity.ok(places);
     }

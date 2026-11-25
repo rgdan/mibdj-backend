@@ -1,6 +1,8 @@
 package teccr.mibdj.service;
 
 import org.springframework.stereotype.Service;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.server.ResponseStatusException;
 import teccr.mibdj.data.Game;
 import teccr.mibdj.repository.GameRepository;
 
@@ -24,5 +26,10 @@ public class GameService {
 
     public Optional<Game> getGameById(Long id) {
         return gameRepository.findById(id);
+    }
+
+    public Game requireGame(Long gameId) {
+        return getGameById(gameId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "El juego no existe"));
     }
 }

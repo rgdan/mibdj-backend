@@ -7,8 +7,6 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 import teccr.mibdj.data.CollectionItem;
 import teccr.mibdj.repository.CollectionRepository;
-import teccr.mibdj.repository.GameRepository;
-import teccr.mibdj.repository.UserRepository;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -20,34 +18,34 @@ import java.util.List;
 public class CollectionService {
 
     private final CollectionRepository collectionRepository;
-    private final UserRepository userRepository;
-    private final GameRepository gameRepository;
+    private final UserService userService;
+    private final GameService gameService;
 
     public CollectionService(CollectionRepository collectionRepository,
-                             UserRepository userRepository,
-                             GameRepository gameRepository) {
+                             UserService userService,
+                             GameService gameService) {
         this.collectionRepository = collectionRepository;
-        this.userRepository = userRepository;
-        this.gameRepository = gameRepository;
+        this.userService = userService;
+        this.gameService = gameService;
     }
 
     public List<CollectionItem> getCollection(Long userId, String status) {
-        requireUser(userId);
+        userService.requireUser(userId);
         String statusFilter = status == null || status.isBlank()
                 ? null : status.trim().toLowerCase();
         return collectionRepository.findByUser(userId, statusFilter);
     }
 
     public CollectionItem getItem(Long userId, Long gameId) {
-        requireUser(userId);
+        userService.requireUser(userId);
         return collectionRepository.findByUserAndGame(userId, gameId)
                 .orElseThrow(() -> notInCollection(gameId));
     }
 
     @Transactional
     public CollectionItem addGame(Long userId, Long gameId, LocalDate date, String status) {
-        requireUser(userId);
-        requireGame(gameId);
+        userService.requireUser(userId);
+        gameService.requireGame(gameId);
         if (collectionRepository.findByUserAndGame(userId, gameId).isPresent()) {
             throw alreadyInCollection(gameId);
         }
@@ -62,7 +60,7 @@ public class CollectionService {
 
     @Transactional
     public CollectionItem updateGame(Long userId, Long gameId, LocalDate date, String status) {
-        requireUser(userId);
+        userService.requireUser(userId);
         if (collectionRepository.update(userId, gameId, date, status) == 0) {
             throw notInCollection(gameId);
         }
@@ -71,23 +69,12 @@ public class CollectionService {
 
     @Transactional
     public void removeGame(Long userId, Long gameId) {
-        requireUser(userId);
+        userService.requireUser(userId);
         if (collectionRepository.delete(userId, gameId) == 0) {
             throw notInCollection(gameId);
         }
     }
 
-    private void requireUser(Long userId) {
-        if (userRepository.findById(userId).isEmpty()) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "El usuario no existe");
-        }
-    }
-
-    private void requireGame(Long gameId) {
-        if (gameRepository.findById(gameId).isEmpty()) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "El juego no existe");
-        }
-    }
 
     private static ResponseStatusException notInCollection(Long gameId) {
         return new ResponseStatusException(HttpStatus.NOT_FOUND,

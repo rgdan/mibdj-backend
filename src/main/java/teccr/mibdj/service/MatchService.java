@@ -6,9 +6,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 import teccr.mibdj.data.Match;
 import teccr.mibdj.data.MatchParticipant;
-import teccr.mibdj.repository.GameRepository;
 import teccr.mibdj.repository.MatchRepository;
-import teccr.mibdj.repository.UserRepository;
 
 import java.time.LocalDate;
 import java.util.HashSet;
@@ -19,15 +17,15 @@ import java.util.Set;
 public class MatchService {
 
     private final MatchRepository matchRepository;
-    private final UserRepository userRepository;
-    private final GameRepository gameRepository;
+    private final UserService userService;
+    private final GameService gameService;
 
     public MatchService(MatchRepository matchRepository,
-                        UserRepository userRepository,
-                        GameRepository gameRepository) {
+                        UserService userService,
+                        GameService gameService) {
         this.matchRepository = matchRepository;
-        this.userRepository = userRepository;
-        this.gameRepository = gameRepository;
+        this.userService = userService;
+        this.gameService = gameService;
     }
 
     @Transactional
@@ -43,20 +41,13 @@ public class MatchService {
         }
 
 
-        if (userRepository.findById(organizerUserId).isEmpty()) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Usuario organizador no encontrado");
-        }
-        if (gameRepository.findById(gameId).isEmpty()) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Juego no encontrado");
-        }
+        userService.requireUser(organizerUserId);
+        gameService.requireGame(gameId);
         if (!matchRepository.placeExists(placeId)) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Lugar no encontrado");
         }
         for (MatchParticipant p : participantes) {
-            if (userRepository.findById(p.getUserId()).isEmpty()) {
-                throw new ResponseStatusException(HttpStatus.NOT_FOUND,
-                        "Usuario participante no encontrado: " + p.getUserId());
-            }
+            userService.requireUser(p.getUserId());
         }
 
 
@@ -72,16 +63,12 @@ public class MatchService {
     }
 
     public List<Match> getUserMatches(long userId) {
-        if (userRepository.findById(userId).isEmpty()) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Usuario no encontrado");
-        }
+        userService.requireUser(userId);
         return matchRepository.findMatchesByUserId(userId);
     }
 
     public Match getUserMatchDetail(long userId, long matchId) {
-        if (userRepository.findById(userId).isEmpty()) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Usuario no encontrado");
-        }
+        userService.requireUser(userId);
         return matchRepository.findMatchDetailForUser(userId, matchId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Partida no encontrada"));
     }

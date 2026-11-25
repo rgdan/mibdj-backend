@@ -1,11 +1,8 @@
 package teccr.mibdj.service;
 
 import org.springframework.stereotype.Service;
-import org.springframework.http.HttpStatus;
-import org.springframework.web.server.ResponseStatusException;
 import teccr.mibdj.data.Place;
 import teccr.mibdj.repository.PlaceRepository;
-import teccr.mibdj.repository.UserRepository;
 
 import java.util.List;
 
@@ -13,21 +10,20 @@ import java.util.List;
 public class PlaceService {
 
     private final PlaceRepository placeRepository;
-    private final UserRepository userRepository;
+    private final UserService userService;
 
-    public PlaceService(PlaceRepository placeRepository, UserRepository userRepository) {
+    public PlaceService(PlaceRepository placeRepository, UserService userService) {
         this.placeRepository = placeRepository;
-        this.userRepository = userRepository;
+        this.userService = userService;
     }
 
     public List<Place> getPlacesByUserId(Long userId) {
+        userService.requireUser(userId);
         return placeRepository.findByUserId(userId);
     }
 
     public Place createPlace(Long userId, String name, String address) {
-        if (userRepository.findById(userId).isEmpty()) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "El usuario no existe");
-        }
+        userService.requireUser(userId);
         return placeRepository.insert(userId, name, address);
     }
 }

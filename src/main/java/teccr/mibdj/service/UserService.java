@@ -37,10 +37,13 @@ public class UserService {
         return userRepository.findById(id);
     }
 
+    public User requireUser(Long userId) {
+        return getUserById(userId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "El usuario no existe"));
+    }
+
     public teccr.mibdj.api.UsersController.UserStatsResponse getUserStats(long userId) {
-        if (userRepository.findById(userId).isEmpty()) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Usuario no encontrado");
-        }
+        requireUser(userId);
 
         return new teccr.mibdj.api.UsersController.UserStatsResponse(
                 userRepository.findMostPlayedGames(userId),

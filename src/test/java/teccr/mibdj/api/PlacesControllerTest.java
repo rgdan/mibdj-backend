@@ -31,7 +31,7 @@ class PlacesControllerTest {
         users = mock(UserRepository.class);
         when(users.findById(anyLong())).thenReturn(Optional.of(new User()));
         mvc = MockMvcBuilders.standaloneSetup(new UsersController(
-                new UserService(users), new PlaceService(places, users))).build();
+                new UserService(users), new PlaceService(places, new UserService(users)))).build();
     }
 
     @Test
@@ -78,6 +78,8 @@ class PlacesControllerTest {
     @Test
     void missingUserReturns404WithoutWriting() throws Exception {
         when(users.findById(999L)).thenReturn(Optional.empty());
+        mvc.perform(get("/api/v1/users/999/places"))
+                .andExpect(status().isNotFound());
         mvc.perform(post("/api/v1/users/999/places")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"name\":\"Casa\",\"address\":\"Centro\"}"))
