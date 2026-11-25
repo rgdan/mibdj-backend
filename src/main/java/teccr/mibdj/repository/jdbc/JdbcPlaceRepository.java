@@ -4,12 +4,14 @@ import teccr.mibdj.repository.PlaceRepository;
 
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
+import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.stereotype.Repository;
 import teccr.mibdj.data.Place;
 
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.*;
 
 @Repository
@@ -31,6 +33,26 @@ public class JdbcPlaceRepository implements PlaceRepository {
                 PLACE_ROW_MAPPER,
                 userId
         );
+    }
+
+    @Override
+    public Place insert(Long userId, String name, String address) {
+        GeneratedKeyHolder keys = new GeneratedKeyHolder();
+        jdbcTemplate.update(connection -> {
+            var statement = connection.prepareStatement(
+                    "INSERT INTO Lugar (id_usuario, nombre, direccion) VALUES (?, ?, ?)",
+                    Statement.RETURN_GENERATED_KEYS);
+            statement.setLong(1, userId);
+            statement.setString(2, name);
+            statement.setString(3, address);
+            return statement;
+        }, keys);
+
+        Place place = new Place();
+        place.setPlaceId(Objects.requireNonNull(keys.getKey()).longValue());
+        place.setName(name);
+        place.setAddress(address);
+        return place;
     }
 
     private static Place mapPlace(ResultSet resultSet, int rowNumber) throws SQLException {

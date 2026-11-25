@@ -318,12 +318,17 @@ Respuesta de las valoraciones de Catan con los datos de ejemplo:
 
 ## Lugares
 
-Lugares precargados del usuario para el selector al registrar una partida
-(tabla `Lugar`).
+Lugares del usuario para el selector al registrar una partida (tabla `Lugar`).
+También se pueden crear por separado, antes de registrar la partida.
 
 | Método | Ruta | Respuesta |
 |---|---|---|
 | `GET` | `/api/v1/users/{id}/places` | `200 OK` con los lugares del usuario, ordenados por nombre; `[]` si no tiene lugares; `404 Not Found` si el usuario no existe. |
+| `POST` | `/api/v1/users/{userId}/places` | `201 Created` con el lugar creado; `400 Bad Request` para datos inválidos; `404 Not Found` si el usuario no existe. |
+
+`POST` recibe `name` y `address`: textos obligatorios de máximo 255 caracteres
+después de quitar los espacios externos. El ID se genera con `AUTO_INCREMENT`;
+el lugar se guarda para el usuario de la ruta y aparece en su listado.
 
 Campos de la respuesta:
 
@@ -335,6 +340,9 @@ Campos de la respuesta:
 
 ```sh
 curl -i http://localhost:8080/api/v1/users/1/places
+curl -i http://localhost:8080/api/v1/users/1/places \
+  -H 'Content-Type: application/json' \
+  -d '{"name":"Casa de Ana","address":"Alajuela centro"}'
 ```
 
 Respuesta para el usuario `1` del seed:

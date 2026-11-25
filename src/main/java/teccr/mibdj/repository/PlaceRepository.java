@@ -10,4 +10,6 @@ public interface PlaceRepository {
 
     List<Place> findByUserId(Long userId);
 
+    Place insert(Long userId, String name, String address);
+
 }

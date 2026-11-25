@@ -56,7 +56,7 @@ CREATE TABLE Categoria (
 -- Tabla: Lugar
 -- Lugares  donde se juegan las partidas.
 CREATE TABLE Lugar (
-    id_lugar   INT NOT NULL,
+    id_lugar   INT NOT NULL AUTO_INCREMENT,
     id_usuario INT NOT NULL,      -- Enlazamos el jugar un usuario específico
     nombre     VARCHAR(255) NOT NULL,
     direccion  VARCHAR(255) NOT NULL,

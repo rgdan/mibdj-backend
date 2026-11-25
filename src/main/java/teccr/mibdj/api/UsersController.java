@@ -3,6 +3,8 @@ package teccr.mibdj.api;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import teccr.mibdj.data.User;
@@ -43,6 +45,22 @@ public class UsersController {
         }
         List<Place> places = placeService.getPlacesByUserId(id);
         return ResponseEntity.ok(places);
+    }
+
+    @PostMapping("/users/{userId}/places")
+    public ResponseEntity<Place> createPlace(@PathVariable Long userId,
+                                            @Valid @RequestBody PlaceRequest request) {
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(placeService.createPlace(userId, request.name(), request.address()));
+    }
+
+    public record PlaceRequest(
+            @NotBlank @Size(max = 255) String name,
+            @NotBlank @Size(max = 255) String address) {
+        public PlaceRequest {
+            name = name == null ? null : name.trim();
+            address = address == null ? null : address.trim();
+        }
     }
 
 

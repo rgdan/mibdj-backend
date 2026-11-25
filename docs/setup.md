@@ -36,6 +36,14 @@ la línea final de `ready for connections` debe indicar `port: 3306`.
 Salí de los logs con `Ctrl+C`; el contenedor sigue funcionando.
 Los datos se conservan en el volumen y los scripts se importan solo cuando está vacío.
 
+Si tu base de datos se creó antes de incorporar la creación de lugares, ejecutá
+una vez la [migración de IDs de lugares](migrations/001-place-auto-increment.sql)
+sobre `juegos_mesadb`. Conserva los lugares y las partidas existentes:
+
+```sh
+docker exec -i mibdj-mysql mysql -umibdj -pmibdj_local juegos_mesadb < docs/migrations/001-place-auto-increment.sql
+```
+
 ## 3. Arrancar el backend
 
 La primera vez, creá `.env` en la raíz con estos valores para el contenedor anterior:
